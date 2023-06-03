@@ -1,11 +1,13 @@
 package lab3.anhtuan.controller;
 
+import jakarta.validation.Valid;
 import lab3.anhtuan.entity.Book;
 import lab3.anhtuan.services.BookServices;
 import lab3.anhtuan.services.CategoryServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,16 +32,21 @@ public class BookController {
         model.addAttribute("categories",categoryService.getAllCategories());
         return "Book/add";
     }
+
     @PostMapping("/add")
-    public  String addBook(@ModelAttribute("book") Book book){
+    public  String addBook(@ModelAttribute("book") Book book,BindingResult bindingResult, Model model ){
+        if (bindingResult.hasErrors()){
+            model.addAttribute("categories",categoryService.getAllCategories());
+            return "books/add";
+        }
         bookService.addBook(book);
         return "redirect:/books";
     }
     @GetMapping("/edit/{id}")
     public String editBookForm(@PathVariable("id") Long id, Model model) {
-        Book ediBook = bookService.getBookById(id);
-        if (ediBook != null) {
-            model.addAttribute("book", ediBook);
+        Book editBook = bookService.getBookById(id);
+        if (editBook != null) {
+            model.addAttribute("book", editBook);
             model.addAttribute("categories", categoryService.getAllCategories());
             return "book/edit";
         } else {
@@ -50,12 +57,12 @@ public class BookController {
     @PostMapping("/edit")
     public String editBook(@ModelAttribute("book") Book updatedBook) {
         bookService.updateBook(updatedBook);
-        return "redirect:/book";
+        return "redirect:/books";
     }
 
     @GetMapping("/delete/{id}")
     public  String deleteBook(@PathVariable("id") Long id) {
         bookService.deleteBook(id);
-        return "redirect:/book";
+        return "redirect:/books";
     }
 }
